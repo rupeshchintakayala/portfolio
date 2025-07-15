@@ -106,13 +106,58 @@ export function Contact() {
     return () => clearInterval(interval)
   }, [])
 
-  // Input sanitization
+  // Input sanitization (preserve spaces during typing)
   const sanitizeInput = (input: string): string => {
     return input
       .replace(/[<>]/g, '') // Remove < and > to prevent XSS
       .replace(/javascript:/gi, '') // Remove javascript: protocol
       .replace(/on\w+\s*=/gi, '') // Remove event handlers
-      .trim()
+      // Note: No .trim() here - spaces are preserved during typing
+  }
+
+  // Email domain validation - Only accept legitimate domains
+  const isValidEmailDomain = (email: string): boolean => {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    if (!emailPattern.test(email)) return false
+    
+    const domain = email.split('@')[1].toLowerCase()
+    
+    // Popular email providers
+    const trustedProviders = [
+      'gmail.com', 'googlemail.com', 'outlook.com', 'hotmail.com', 'live.com',
+      'yahoo.com', 'yahoo.co.uk', 'ymail.com', 'aol.com', 'icloud.com', 'me.com',
+      'protonmail.com', 'zoho.com', 'mail.com', 'gmx.com', 'fastmail.com'
+    ]
+    
+    // Check if it's a trusted provider
+    if (trustedProviders.includes(domain)) return true
+    
+    // For other domains, apply stricter validation for legitimate company domains
+    const domainParts = domain.split('.')
+    
+    // Must have at least 2 parts (domain.tld)
+    if (domainParts.length < 2) return false
+    
+    // Reject obviously fake domains
+    const fakeDomains = ['abc.com', 'xyz.com', 'test.com', 'example.com', 'domain.com', 'email.com']
+    if (fakeDomains.includes(domain)) return false
+    
+    // Reject single letter domains or very short domains
+    const mainDomain = domainParts[domainParts.length - 2]
+    if (mainDomain.length < 3) return false
+    
+    // Accept legitimate TLDs for company domains
+    const validTLDs = [
+      'com', 'org', 'net', 'edu', 'gov', 'mil', 'int',
+      'co.uk', 'co.in', 'co.za', 'com.au', 'com.br', 'com.mx',
+      'de', 'fr', 'it', 'es', 'nl', 'be', 'ch', 'at', 'dk', 'se', 'no', 'fi',
+      'ca', 'us', 'uk', 'au', 'nz', 'jp', 'kr', 'cn', 'in', 'br', 'mx', 'ar'
+    ]
+    
+    const tld = domainParts.slice(-2).join('.')
+    const singleTLD = domainParts[domainParts.length - 1]
+    
+    return validTLDs.includes(tld) || validTLDs.includes(singleTLD)
   }
 
   // Comprehensive validation
@@ -137,11 +182,11 @@ export function Contact() {
       newErrors.name = 'Name can only contain letters, spaces, hyphens, and apostrophes'
     }
 
-    // Email validation
+    // Email validation - Only accept legitimate domains
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address'
+    } else if (!isValidEmailDomain(formData.email)) {
+      newErrors.email = 'Please enter a valid email with a legitimate domain'
     } else if (formData.email.length > 254) {
       newErrors.email = 'Email address is too long'
     }
