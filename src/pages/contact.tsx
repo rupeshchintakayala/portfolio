@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import emailjs from '@emailjs/browser'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
-// Using native textarea element instead
 import { Label } from '../components/ui/label'
-import { Mail, Phone, MapPin, Github, Linkedin, Twitter, Send, Loader2 } from 'lucide-react'
+import { Mail, Phone, MapPin, Github, Linkedin, Twitter, Send, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
+import { EMAILJS_CONFIG } from '../config/emailjs'
 
 const contactInfo = [
   {
@@ -46,35 +47,189 @@ const socialLinks = [
   },
 ]
 
+// Rate limiting configuration
+const RATE_LIMIT = {
+  maxSubmissions: 3,
+  timeWindow: 60000, // 1 minute
+  cooldownPeriod: 300000 // 5 minutes
+}
+
+interface FormData {
+  name: string
+  email: string
+  message: string
+  honeypot: string // Anti-bot field
+}
+
+interface FormErrors {
+  name?: string
+  email?: string
+  message?: string
+  general?: string
+}
+
 export function Contact() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     message: '',
+    honeypot: '', // Hidden field for bot detection
   })
+  const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [isRateLimited, setIsRateLimited] = useState(false)
+  const [timeToReset, setTimeToReset] = useState(0)
+  const lastSubmissionTime = useRef<number[]>([])
+
+  // Rate limiting check
+  useEffect(() => {
+    const checkRateLimit = () => {
+      const now = Date.now()
+      const submissions = lastSubmissionTime.current.filter(
+        time => now - time < RATE_LIMIT.timeWindow
+      )
+      
+      if (submissions.length >= RATE_LIMIT.maxSubmissions) {
+        setIsRateLimited(true)
+        const oldestSubmission = Math.min(...submissions)
+        const resetTime = oldestSubmission + RATE_LIMIT.cooldownPeriod
+        setTimeToReset(Math.max(0, resetTime - now))
+      } else {
+        setIsRateLimited(false)
+        setTimeToReset(0)
+      }
+    }
+
+    checkRateLimit()
+    const interval = setInterval(checkRateLimit, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Input sanitization
+  const sanitizeInput = (input: string): string => {
+    return input
+      .replace(/[<>]/g, '') // Remove < and > to prevent XSS
+      .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/on\w+\s*=/gi, '') // Remove event handlers
+      .trim()
+  }
+
+  // Comprehensive validation
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {}
+
+    // Honeypot check (anti-bot)
+    if (formData.honeypot) {
+      newErrors.general = 'Spam detected'
+      setErrors(newErrors)
+      return false
+    }
+
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required'
+    } else if (formData.name.length < 2) {
+      newErrors.name = 'Name must be at least 2 characters'
+    } else if (formData.name.length > 50) {
+      newErrors.name = 'Name must be less than 50 characters'
+    } else if (!/^[a-zA-Z\s'-]+$/.test(formData.name)) {
+      newErrors.name = 'Name can only contain letters, spaces, hyphens, and apostrophes'
+    }
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address'
+    } else if (formData.email.length > 254) {
+      newErrors.email = 'Email address is too long'
+    }
+
+    // Message validation
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required'
+    } else if (formData.message.length < 10) {
+      newErrors.message = 'Message must be at least 10 characters'
+    } else if (formData.message.length > 1000) {
+      newErrors.message = 'Message must be less than 1000 characters'
+    }
+
+    // Check for suspicious patterns
+    const suspiciousPatterns = [
+      /\b(viagra|cialis|casino|lottery|winner|congratulations)\b/i,
+      /https?:\/\/[^\s]+/g, // URLs
+      /\b\d{4}[-\s]\d{4}[-\s]\d{4}[-\s]\d{4}\b/, // Credit card patterns
+    ]
+
+    const allText = `${formData.name} ${formData.email} ${formData.message}`
+    if (suspiciousPatterns.some(pattern => pattern.test(allText))) {
+      newErrors.general = 'Message contains suspicious content'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    const sanitizedValue = sanitizeInput(value)
+    
+    setFormData(prev => ({ ...prev, [name]: sanitizedValue }))
+    
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }))
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (isRateLimited) {
+      setErrors({ general: `Too many submissions. Please wait ${Math.ceil(timeToReset / 60000)} minutes.` })
+      return
+    }
+
+    if (!validateForm()) {
+      return
+    }
+
     setIsSubmitting(true)
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    setIsSubmitting(false)
-    setSubmitted(true)
-    
-    // Reset form after success
-    setTimeout(() => {
-      setFormData({ name: '', email: '', message: '' })
-      setSubmitted(false)
-    }, 3000)
+    setErrors({})
+
+    try {
+      // Record submission time for rate limiting
+      lastSubmissionTime.current.push(Date.now())
+      
+      // Send email using EmailJS
+      await emailjs.send(
+        EMAILJS_CONFIG.SERVICE_ID,
+        EMAILJS_CONFIG.TEMPLATE_ID,
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          message: formData.message,
+          to_name: 'Portfolio Owner', // This will be replaced with your name in the template
+        },
+        EMAILJS_CONFIG.PUBLIC_KEY
+      )
+      
+      setSubmitted(true)
+      
+      // Reset form after success
+      setTimeout(() => {
+        setFormData({ name: '', email: '', message: '', honeypot: '' })
+        setSubmitted(false)
+      }, 5000)
+      
+    } catch (error) {
+      setErrors({ 
+        general: error instanceof Error ? error.message : 'An error occurred. Please try again.' 
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -112,6 +267,33 @@ export function Contact() {
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Honeypot field - hidden from users */}
+                    <input
+                      type="text"
+                      name="honeypot"
+                      value={formData.honeypot}
+                      onChange={handleChange}
+                      style={{ display: 'none' }}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+
+                    {/* General Error */}
+                    {errors.general && (
+                      <div className="flex items-center space-x-2 text-red-600 text-sm">
+                        <AlertCircle className="h-4 w-4" />
+                        <span>{errors.general}</span>
+                      </div>
+                    )}
+
+                    {/* Success Message */}
+                    {submitted && (
+                      <div className="flex items-center space-x-2 text-green-600 text-sm">
+                        <CheckCircle className="h-4 w-4" />
+                        <span>Message sent successfully! I'll get back to you soon.</span>
+                      </div>
+                    )}
+
                     <div className="space-y-2">
                       <Label htmlFor="name">Name</Label>
                       <Input
@@ -120,8 +302,12 @@ export function Contact() {
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="Your name"
-                        required
+                        maxLength={50}
+                        className={errors.name ? 'border-red-500' : ''}
                       />
+                      {errors.name && (
+                        <p className="text-red-600 text-sm">{errors.name}</p>
+                      )}
                     </div>
                     
                     <div className="space-y-2">
@@ -133,8 +319,12 @@ export function Contact() {
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="your.email@example.com"
-                        required
+                        maxLength={254}
+                        className={errors.email ? 'border-red-500' : ''}
                       />
+                      {errors.email && (
+                        <p className="text-red-600 text-sm">{errors.email}</p>
+                      )}
                     </div>
                     
                     <div className="space-y-2">
@@ -146,15 +336,19 @@ export function Contact() {
                         onChange={handleChange}
                         placeholder="Tell me about your project or just say hello!"
                         rows={5}
-                        required
-                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        maxLength={1000}
+                        className={`flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.message ? 'border-red-500' : ''}`}
                       />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>{errors.message && <span className="text-red-600">{errors.message}</span>}</span>
+                        <span>{formData.message.length}/1000</span>
+                      </div>
                     </div>
                     
                     <Button
                       type="submit"
                       className="w-full"
-                      disabled={isSubmitting || submitted}
+                      disabled={isSubmitting || submitted || isRateLimited}
                     >
                       {isSubmitting ? (
                         <>
@@ -163,8 +357,13 @@ export function Contact() {
                         </>
                       ) : submitted ? (
                         <>
-                          <Send className="mr-2 h-4 w-4" />
+                          <CheckCircle className="mr-2 h-4 w-4" />
                           Message Sent!
+                        </>
+                      ) : isRateLimited ? (
+                        <>
+                          <AlertCircle className="mr-2 h-4 w-4" />
+                          Rate Limited
                         </>
                       ) : (
                         <>
@@ -173,6 +372,12 @@ export function Contact() {
                         </>
                       )}
                     </Button>
+
+                    {isRateLimited && (
+                      <p className="text-sm text-orange-600 text-center">
+                        Too many submissions. Please wait {Math.ceil(timeToReset / 60000)} minutes before trying again.
+                      </p>
+                    )}
                   </form>
                 </CardContent>
               </Card>
