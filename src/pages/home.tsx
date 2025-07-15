@@ -28,9 +28,9 @@ const socialLinks = [
 
 export function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="pt-16 min-h-[calc(100vh-4rem)] flex items-center justify-center">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pt-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero Content */}
             <motion.div
