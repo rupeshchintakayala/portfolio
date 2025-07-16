@@ -47,7 +47,7 @@ export function Home() {
                   transition={{ duration: 0.8, delay: 0.2 }}
                   className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary via-primary to-primary/80 bg-clip-text text-transparent"
                 >
-                  Hi, I'm Your Name
+                  Hi, I'm Rupesh
                 </motion.h1>
                 
                 <motion.p
@@ -56,7 +56,7 @@ export function Home() {
                   transition={{ duration: 0.8, delay: 0.4 }}
                   className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto"
                 >
-                  Frontend Developer & Designer
+                  Full Stack Developer
                 </motion.p>
                 
                 <motion.p
