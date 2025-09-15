@@ -7,17 +7,12 @@ const socialLinks = [
   {
     name: 'GitHub',
     icon: Github,
-    href: 'https://github.com/yourusername',
+    href: 'https://github.com/rupeshchintakayala',
   },
   {
     name: 'LinkedIn',
     icon: Linkedin,
-    href: 'https://linkedin.com/in/yourusername',
-  },
-  {
-    name: 'Twitter',
-    icon: Twitter,
-    href: 'https://twitter.com/yourusername',
+    href: 'https://linkedin.com/in/rupeshchintakayala',
   },
   {
     name: 'Email',
@@ -65,8 +60,7 @@ export function Home() {
                   transition={{ duration: 0.8, delay: 0.6 }}
                   className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed"
                 >
-                  I create beautiful, responsive web applications with modern technologies.
-                  Passionate about clean code, user experience, and bringing ideas to life.
+                  Turning complex logic into elegant backends that make products come alive.
                 </motion.p>
               </div>
 
