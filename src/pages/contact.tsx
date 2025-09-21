@@ -9,23 +9,23 @@ import { Mail, Phone, MapPin, Github, Linkedin, Twitter, Send, Loader2, AlertCir
 import { EMAILJS_CONFIG } from '../config/emailjs'
 
 const contactInfo = [
-  {
-    icon: Mail,
-    title: 'Email',
-    value: 'your.email@example.com',
-    href: 'mailto:your.email@example.com',
-  },
-  {
-    icon: Phone,
-    title: 'Phone',
-    value: '+1 (555) 123-4567',
-    href: 'tel:+15551234567',
-  },
+  // {
+  //   icon: Mail,
+  //   title: 'Email',
+  //   value: 'your.email@example.com',
+  //   href: 'mailto:your.email@example.com',
+  // },
+  // {
+  //   icon: Phone,
+  //   title: 'Phone',
+  //   value: '+1 (555) 123-4567',
+  //   href: 'tel:+15551234567',
+  // },
   {
     icon: MapPin,
     title: 'Location',
-    value: 'San Francisco, CA',
-    href: 'https://maps.google.com/?q=San Francisco, CA',
+    value: 'Dublin, Ireland',
+    href: 'https://maps.google.com/?q=Dublin, Ireland',
   },
 ]
 
@@ -33,17 +33,12 @@ const socialLinks = [
   {
     name: 'GitHub',
     icon: Github,
-    href: 'https://github.com/yourusername',
+    href: 'https://github.com/rupeshchintakayala/',
   },
   {
     name: 'LinkedIn',
     icon: Linkedin,
-    href: 'https://linkedin.com/in/yourusername',
-  },
-  {
-    name: 'Twitter',
-    icon: Twitter,
-    href: 'https://twitter.com/yourusername',
+    href: 'https://linkedin.com/in/rupeshchintakayala',
   },
 ]
 
@@ -255,7 +250,7 @@ export function Contact() {
           from_name: formData.name,
           from_email: formData.email,
           message: formData.message,
-          to_name: 'Portfolio Owner', // This will be replaced with your name in the template
+          to_name: 'Rupesh',
         },
         EMAILJS_CONFIG.PUBLIC_KEY
       )
@@ -346,7 +341,7 @@ export function Contact() {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="Your name"
+                        placeholder="Rupesh"
                         maxLength={50}
                         className={errors.name ? 'border-red-500' : ''}
                       />

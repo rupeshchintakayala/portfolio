@@ -5,59 +5,31 @@ import { Badge } from '../components/ui/badge'
 import { ExternalLink, Github, Image } from 'lucide-react'
 
 const projects = [
-  {
-    id: 1,
-    title: 'E-commerce Platform',
-    description: 'A full-stack e-commerce solution with React, Node.js, and PostgreSQL. Features include user authentication, product catalog, shopping cart, and payment integration.',
-    image: '/api/placeholder/400/300',
-    tags: ['React', 'Node.js', 'PostgreSQL', 'Stripe'],
-    githubUrl: 'https://github.com/yourusername/ecommerce-platform',
-    liveUrl: 'https://your-ecommerce-site.com',
+ {
+  id: 1,
+  title: 'Health Tracker - Patient Data Management System',
+  description: 'A static HTML + JavaScript website for managing and viewing patient health records. This application loads patient data from a local JSON file and provides a search interface to find and display patient information.',
+  image: '/api/placeholder/400/300',
+  tags: ['HTML', 'JavaScript', 'TailwindCSS'],
+  githubUrl: 'https://github.com/rupeshchintakayala/health-records-viewer',
+  liveUrl: 'https://rupeshchintakayala.github.io/health-records-viewer/',
+  features: [
+    'Patient Search: Search for patients by their unique Patient ID',
+    'Patient Profile: View comprehensive patient information including demographics and medical history',
+    'Latest Vitals: Display current vital signs with visual indicators',
+    'Doctor Notes: Show chronological list of doctor notes with timestamps',
+    'Responsive Design: Mobile-friendly interface using TailwindCSS',
+    'Static Deployment: No backend required - can be hosted on GitHub Pages'
+  ]
   },
   {
     id: 2,
-    title: 'Task Management App',
-    description: 'A collaborative task management application built with React and Firebase. Real-time updates, drag-and-drop functionality, and team collaboration features.',
-    image: '/api/placeholder/400/300',
-    tags: ['React', 'Firebase', 'Tailwind CSS', 'Drag & Drop'],
-    githubUrl: 'https://github.com/yourusername/task-manager',
-    liveUrl: 'https://your-task-app.com',
-  },
-  {
-    id: 3,
-    title: 'Weather Dashboard',
-    description: 'A responsive weather application with location-based forecasts, interactive maps, and historical weather data visualization using Chart.js.',
-    image: '/api/placeholder/400/300',
-    tags: ['React', 'Chart.js', 'Weather API', 'CSS3'],
-    githubUrl: 'https://github.com/yourusername/weather-dashboard',
-    liveUrl: 'https://your-weather-app.com',
-  },
-  {
-    id: 4,
-    title: 'Social Media Dashboard',
-    description: 'A comprehensive social media management dashboard with analytics, post scheduling, and multi-platform integration.',
-    image: '/api/placeholder/400/300',
-    tags: ['Next.js', 'TypeScript', 'MongoDB', 'Social APIs'],
-    githubUrl: 'https://github.com/yourusername/social-dashboard',
-    liveUrl: 'https://your-social-dashboard.com',
-  },
-  {
-    id: 5,
-    title: 'Recipe Finder App',
-    description: 'A mobile-first recipe application with ingredient-based search, meal planning, and nutritional information powered by external APIs.',
-    image: '/api/placeholder/400/300',
-    tags: ['React Native', 'Recipe API', 'SQLite', 'Expo'],
-    githubUrl: 'https://github.com/yourusername/recipe-finder',
-    liveUrl: 'https://your-recipe-app.com',
-  },
-  {
-    id: 6,
     title: 'Portfolio Website',
     description: 'A modern, responsive portfolio website built with React, TypeScript, and Tailwind CSS. Features smooth animations and dark mode support.',
     image: '/api/placeholder/400/300',
     tags: ['React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
-    githubUrl: 'https://github.com/yourusername/portfolio',
-    liveUrl: 'https://your-portfolio.com',
+    githubUrl: 'https://github.com/rupeshchintakayala/portfolio',
+    liveUrl: 'https://rupeshchintakayala.github.io/portfolio/',
   },
 ]
 
