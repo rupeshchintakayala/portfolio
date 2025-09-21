@@ -6,22 +6,12 @@ const socialLinks = [
   {
     name: 'GitHub',
     icon: Github,
-    href: 'https://github.com/yourusername',
+    href: 'https://github.com/rupeshchintakayala/',
   },
   {
     name: 'LinkedIn',
     icon: Linkedin,
-    href: 'https://linkedin.com/in/yourusername',
-  },
-  {
-    name: 'Twitter',
-    icon: Twitter,
-    href: 'https://twitter.com/yourusername',
-  },
-  {
-    name: 'Email',
-    icon: Mail,
-    href: 'mailto:your.email@example.com',
+    href: 'https://linkedin.com/in/rupeshchintakayala',
   },
 ]
 

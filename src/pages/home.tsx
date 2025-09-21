@@ -14,11 +14,6 @@ const socialLinks = [
     icon: Linkedin,
     href: 'https://linkedin.com/in/rupeshchintakayala',
   },
-  {
-    name: 'Email',
-    icon: Mail,
-    href: 'mailto:your.email@example.com',
-  },
 ]
 
 export function Home() {
