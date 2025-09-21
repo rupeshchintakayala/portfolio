@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
-import { Mail, Phone, MapPin, Github, Linkedin, Twitter, Send, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
+import { MapPin, Github, Linkedin, Send, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
 import { EMAILJS_CONFIG } from '../config/emailjs'
 
 const contactInfo = [
