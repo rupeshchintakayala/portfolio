@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Github, Linkedin, Mail } from 'lucide-react'
+import { ArrowRight, Github, Linkedin } from 'lucide-react'
 import { Button } from '../components/ui/button'
 
 const socialLinks = [
